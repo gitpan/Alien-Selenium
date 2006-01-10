@@ -23,11 +23,17 @@ sub selenium_archive {
 }
 
 sub selenium_url {
-    return 'http://gforge.public.thoughtworks.org/download.php/51/' 
+    return 'http://gforge.public.thoughtworks.org/download.php/51/'
       . $_[0]->selenium_archive;
 }
 
 sub selenium_directory {
+    foreach my $d ( [ 'selenium-', Alien::Selenium->version ],
+                    [ 'selenium-', Alien::Selenium->version, '-stripped' ] ) {
+        my $dir = join '', @$d;
+        return $dir if -d $dir;
+    }
+
     return join '', 'selenium-', Alien::Selenium->version;
 }
 
@@ -79,8 +85,10 @@ sub install_selenium {
     foreach my $file ( @files ) {
         my $dest = File::Spec->catfile
                        ( $final, File::Basename::basename( $file ) );
-        print $file, ' => ', $dest, "\n";
-        File::Copy::copy( $file, $dest ) or die "copy: $!, $@";
+        $self->copy_if_modified( from    => $file,
+                                 to      => $dest,
+                                 verbose => 1,
+                                 );
     }
 }
 

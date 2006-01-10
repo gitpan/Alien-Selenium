@@ -1,12 +1,8 @@
----
+--- #YAML:1.0
 name: Alien-Selenium
-version: 0.01
+version: 0.02
 author:
   - Mattia Barbon <mbarbon@cpan.org>
 abstract: installing and finding the Selenium Web test framework
 license: perl
-provides:
-  Alien::Selenium:
-    file: lib/Alien/Selenium.pm
-    version: 0.01
-generated_by: Module::Build version 0.2611
+generated_by: Module::Build version 0.2611, without YAML.pm

@@ -19,9 +19,10 @@ Please see L<Alien> for the manifesto of the Alien namespace.
 
 use strict;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
+our $SELENIUM_VERSION = '0.6.0';
 
-sub version { '0.6.0' }
+sub version { $SELENIUM_VERSION }
 
 sub path {
     my $base = $INC{'Alien/Selenium.pm'};

@@ -1,4 +1,8 @@
 Revision history for Perl extension Alien::Selenium.
 
+0.02  
+    - Bundles a stripped version of Selenium 0.6.0.
+      (suggested by Luke Closs)
+
 0.01  Tue Nov  1 10:25:43 CET 2005
     - First public version. Installs Selenium 0.6.0.
