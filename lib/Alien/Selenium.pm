@@ -19,7 +19,7 @@ Please see L<Alien> for the manifesto of the Alien namespace.
 
 use strict;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 our $SELENIUM_VERSION = '0.6.0';
 
 sub version { $SELENIUM_VERSION }

@@ -1,6 +1,10 @@
 Revision history for Perl extension Alien::Selenium.
 
-0.02  
+0.03  Sat Jan 14 16:30:01 CET 2006
+    - Fix installation using CPANPLUS.
+    - Do not try to fetch Selenium when using the bundled one.
+
+0.02  Mon Jan  9 21:55:23 CET 2006
     - Bundles a stripped version of Selenium 0.6.0.
       (suggested by Luke Closs)
 

@@ -40,7 +40,7 @@ sub selenium_directory {
 sub fetch_selenium {
     my $self = shift;
 
-    return if -f $self->selenium_archive;
+    return if -f $self->selenium_archive or -d $self->selenium_directory;
     require File::Fetch;
 
     print "Fetching Selenium...\n";
