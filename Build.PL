@@ -17,6 +17,8 @@ EOC
 my $build = $class->new
   ( module_name      => 'Alien::Selenium',
     license          => 'perl',
+    script_files     => [ qw(bin/selenium_install) ],
+    add_to_cleanup   => [ qw(t/sel) ],
     build_depends    => { 'Test::More'        => 0,
                           'Archive::Zip'      => 1.00,
                           },

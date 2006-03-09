@@ -75,8 +75,7 @@ sub install_selenium {
 
     print "Installing Selenium...\n";
 
-    File::Path::mkpath( 'blib/lib/Alien/Selenium/javascript' )
-        or die "mkpath: $!, $@" unless -d 'blib/lib/Alien/Selenium/javascript';
+    File::Path::mkpath( 'blib/lib/Alien/Selenium/javascript' );
 
     my $final = 'blib/lib/Alien/Selenium/javascript';
     my @files = grep { -f $_ }

@@ -4,6 +4,7 @@ MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
 README.txt
+bin/selenium_install
 inc/File/Fetch.pm
 inc/File/Fetch/Item.pm
 inc/File/Spec/Unix.pm
@@ -16,6 +17,7 @@ inc/Params/Check.pm
 inc/Text/Patch.pm
 lib/Alien/Selenium.pm
 t/01_load.t
+t/02_install.t
 t/z0_pod.t
 # stripped selenium distribution
 selenium-0.6.0-stripped/selenium/dom-images/butmin.gif

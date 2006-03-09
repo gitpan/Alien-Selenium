@@ -1,12 +1,12 @@
 ---
 name: Alien-Selenium
-version: 0.03
+version: 0.04
 author:
-  - Mattia Barbon <mbarbon@cpan.org>
+  - 'Mattia Barbon <mbarbon@cpan.org>'
 abstract: installing and finding the Selenium Web test framework
 license: perl
 provides:
   Alien::Selenium:
     file: lib/Alien/Selenium.pm
-    version: 0.03
+    version: 0.04
 generated_by: Module::Build version 0.2611
