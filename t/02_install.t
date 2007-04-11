@@ -12,7 +12,7 @@ my $dir = 't/sel';
 
 rmtree $dir;
 Alien::Selenium->install( $dir );
-for (qw(selenium-api.js SeleneseRunner.html)) {
+for (qw(selenium.css TestRunner-splash.html)) {
     ok( -e "$dir/$_", "$dir/$_ exists" );
 }
 

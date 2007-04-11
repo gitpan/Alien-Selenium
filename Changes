@@ -1,5 +1,10 @@
 Revision history for Perl extension Alien::Selenium.
 
+0.05  Wed Apr 11 11:20:55 MET 2006
+    - New maintainer DOMQ@cpan.org
+    - Installs Selenium 0.8.2
+    - Handles readystate.xpi
+
 0.04  Tue Mar  7 19:49:55 CET 2006
     - Added the selenium_install utility to install Selenium
       to a specified directory. (based upon a patch by Luke Closs)
