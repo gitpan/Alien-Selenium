@@ -219,7 +219,6 @@ any, will work as normal.
         for(my $package = $self->{package};
             $package; $package =~ s/(::|^)[^:]*$//) {
             my $filename = $package;
-            # FIXME: win32 issue assuming / as the (sole) separator?
             $filename =~ s|::|/|g;
 #warn "Considering $filename against $self->{packfilename}";
             next unless ($self->{packfilename} =~

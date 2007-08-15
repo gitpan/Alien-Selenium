@@ -56,7 +56,7 @@ were the corresponding value instead.
 
 =cut
 
-# FIXME: use Module::Depends or some such to compute this
+# TODO: use Module::Depends or some such to compute this
 # automatically.
 our %is_subpackage_of =
     ( "Catalyst::Controller" => "Catalyst",
@@ -86,7 +86,8 @@ our @pervasives = qw(base warnings strict overload utf8 vars constant
                      DynaLoader ExtUtils::MakeMaker
                      POSIX Fcntl Cwd Sys::Hostname
                      IPC::Open2 IPC::Open3
-                     File::Basename File::Find);
+                     File::Basename File::Find
+                     UNIVERSAL);
 
 =head2 @maintainer_dependencies
 
@@ -102,6 +103,18 @@ our @maintainer_dependencies = qw(Pod::Text Test::Pod Test::Pod::Coverage
                                   Test::NoBreakpoints Module::ScanDeps
                                   IO::File);
 
+=head2 @sunken_dependencies
+
+Put in there any modules that can get required without our crude
+source code parser being able to spot them.
+
+=cut
+
+our @sunken_dependencies =
+    ("Catalyst::Engine::Apache", # Required by simply running under mod_perl
+    );
+
+
 =head2 @ignore
 
 Put any other modules that cause false positives in there.  Consider
@@ -111,7 +124,8 @@ anymore.
 
 =cut
 
-our @ignore = qw(IO);  # False positive by Module::ScanDeps
+our @ignore = ("IO",  # False positive by Module::ScanDeps
+              );
 
 =head1 IMPLEMENTATION
 
@@ -124,11 +138,14 @@ on it.
 my $buildcode = read_file("Build");
 die "Cannot read Build: $!" if ! defined $buildcode;
 $buildcode =~ s|\$build->dispatch|\$build|g;
-our $build = eval <<"STUFF"; die $@ if $@;
+our $build = do {
+    local @INC = @INC; # lest Module::Build mess with it
+    eval <<"STUFF" or die $@;
 no warnings "redefine";
 local *Module::Build::Base::up_to_date = sub {1}; # Shuts warning
 $buildcode
 STUFF
+};
 ok($build->isa("Module::Build"));
 
 =pod
@@ -234,7 +251,7 @@ sub list_deps {
     foreach my $file (@_) {
         die "Cannot open $file: $!" unless defined
             (my $fd = IO::File->new($file, "<"));
-        # Here we go again with your usual half-assed Perl parser...
+        # Here we go again with a run-off-the-mill half-assed Perl parser...
         LINE: while(my $line = $fd->getline) {
             CHUNK: foreach my $pm (Module::ScanDeps::scan_line($line),
                                    scan_line_some_more($line, $file, $fd)) {
@@ -381,7 +398,7 @@ sub compare_dependencies_ok {
     # the build system and therefore cannot check them for accuracy.
     my %bogus_expected = map { ($_ => 1) }
         (@pervasives, $build->requires_for_build(),
-         @maintainer_dependencies);
+         @maintainer_dependencies, @sunken_dependencies);
     my %expected = map { ( ($is_subpackage_of{$_} || $_) => 1) }
         grep { !$bogus_expected{$_} } @$expectedlistref;
 

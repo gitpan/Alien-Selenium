@@ -28,7 +28,7 @@ Please see L<Alien> for the manifesto of the Alien namespace.
 
 use strict;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 our $SELENIUM_VERSION = '0.8.2';
 
 =over

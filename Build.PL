@@ -22,6 +22,7 @@ my $build = $class->new
                          'Test::More'        => 0,
                          'Archive::Zip'      => 1.00,
                         },
+    create_makefile_pl  => 'passthrough',
     );
 $build->create_build_script;
 warn sprintf("Will build Alien::Selenium with selenium version %s\n",
@@ -52,7 +53,8 @@ L<Alien::Selenium>'s source code.
 =cut
 
 sub selenium_version : Config_Option(type="string") {
-    my $version = `$^X -Ilib -MAlien::Selenium -e 'print Alien::Selenium->version'`;
+    # Warning, single quotes don't work in the Win32 shell, see RT #28048
+    my $version = `$^X -Ilib -MAlien::Selenium -e "print Alien::Selenium->version"`;
     die "Problem invoking Alien::Selenium in a sub-Perl" if $?;
     chomp($version);
     return (default => $version);
