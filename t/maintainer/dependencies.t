@@ -19,15 +19,14 @@ fails.
 
 This tests uses L<Module::ScanDeps>, whose guts it rearranges in a
 creative fashion so as to eliminate most false positives and be able
-to pinpoint lines of source code in case the test fails.  This results
-in a somewhat quirky implementation, but OTOH this test is only
-intended for running on the maintainer's system.
+to pinpoint lines of source code in case the test fails.  This does
+result in a somewhat quirky implementation.
 
 =cut
 
 BEGIN {
     my $errors;
-    foreach my $use (qw(Test::More File::Spec File::Slurp
+    foreach my $use (qw(Test::More File::Spec
                         File::Find Module::ScanDeps IO::File)) {
         $errors .= $@ unless eval "use $use; 1";
     }
@@ -95,13 +94,17 @@ The list of modules that are used in C<t/maintainer>, and for which
 there should be provisions to bail out cleanly if they are missing (as
 demonstrated at the top of this very test script).  Provided such
 modules are not listed as dependencies outside of C<t/maintainer>,
-they will be ignored.
+they will be ignored.  (Incidentally this means that dependencies in
+C<t/maintainer> are actually accounted for and not just thrown out, as
+it may be the case that I'm not the B<only> maintainer of a given
+module.)
 
 =cut
 
-our @maintainer_dependencies = qw(Pod::Text Test::Pod Test::Pod::Coverage
+our @maintainer_dependencies = qw(IO::File Pod::Text Pod::Checker
+                                  Test::Pod Test::Pod::Coverage
                                   Test::NoBreakpoints Module::ScanDeps
-                                  IO::File);
+                                  Test::Kwalitee);
 
 =head2 @sunken_dependencies
 
@@ -173,19 +176,20 @@ inc/My/Tests/Below.pm)
 
 =cut
 
-compare_dependencies_ok(list_deps(@blib_files,
-                                  keys %{$build->find_pm_files},
-                                  @{$build->find_test_files},
-                                  "Build.PL"),
-                        [ keys(%{$build->requires}),
-                          keys(%{$build->build_requires}) ],
-                        "compile-time dependencies");
+compare_dependencies_ok
+    (list_deps(@blib_files,
+               keys %{$build->find_pm_files},
+               @{$build->find_test_files},
+               "Build.PL"),
+     [ keys(%{$build->requires}),
+       keys(%{$build->build_requires}) ],
+     "compile-time dependencies");
 
 exit; ##############################################################
 
 =head1 TEST LIBRARY
 
-=head2 file2mod($filename)
+=head2 file2mod ($filename)
 
 Turns $filename into a module name (e.g. C<Foo/Bar.pm> becomes
 C<Foo::Bar>) and returns it.
@@ -198,7 +202,7 @@ sub file2mod {
     return $_;
 }
 
-=head2 mod2file($filename)
+=head2 mod2file ($filename)
 
 The converse of L</file2mod>.
 
@@ -208,6 +212,19 @@ sub mod2file {
     local $_ = shift;
     s|::|/|g; $_ .= ".pm";
     return $_;
+}
+
+=head2 read_file
+
+Same foo as L<File::Slurp/read_file>, sans the dependency on same.
+
+=cut
+
+sub read_file {
+    my ($path) = @_;
+    local *FILE;
+    open FILE, $path or die $!;
+    return wantarray ? <FILE> : join("", <FILE>);
 }
 
 =head2 write_to_temp_file($string)

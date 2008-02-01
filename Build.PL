@@ -67,7 +67,7 @@ sub selenium_version : Config_Option(type="string") {
 use File::Path qw(mkpath rmtree);
 use File::Basename qw(basename);
 use File::Spec::Functions qw(catdir catfile);
-
+use Fatal qw(mkdir);
 
 =head2 ACTION_code
 
@@ -151,7 +151,8 @@ Unpacks the Selenium zipball.
 sub extract_selenium {
     my $self = shift;
 
-    return if -d $self->selenium_directory;
+    my $targetdir = $self->selenium_directory;
+    return if -d $targetdir;
     my $selenium_archive = $self->selenium_archive;
     die "$selenium_archive is not present, cannot extract"
         if (! -f $selenium_archive);
@@ -162,13 +163,30 @@ sub extract_selenium {
 $@
 
 Please either install Archive::Zip or manually extract
-the Selenium distribution inside the build directory.
+the Selenium distribution into $targetdir.
 
 EOT
 
     my $zip = Archive::Zip->new( $selenium_archive );
-    $zip->extractTree == Archive::Zip::AZ_OK() or
+
+    # Some versions of Selenium Core (eg 0.8.3) spill their beans into the
+    # current directory, as opposed to using a main directory named after
+    # the version number :-(.
+
+    use Cwd qw(getcwd);
+    my $origdir = getcwd();
+    if (grep { m|^core/?$| } $zip->memberNames()) {
+      my $target_dir = $self->selenium_directory;
+      mkdir($target_dir) unless -d $target_dir;
+      chdir($target_dir);
+      # Also, Archive::Zip is stupid.
+      $zip = Archive::Zip->new( catfile($origdir, $selenium_archive) );
+    }
+
+    $zip->extractTree() == Archive::Zip::AZ_OK() or
         die "Error extracting file $selenium_archive\n";
+    chdir($origdir);
+    return;
 }
 
 =head2 install_selenium

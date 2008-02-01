@@ -1,12 +1,14 @@
 ---
 name: Alien-Selenium
-version: 0.06
+version: 0.07
 author:
   - |-
     Mattia Barbon <mbarbon@cpan.org>
     Dominique Quatravaux <domq@cpan.org>
 abstract: installing and finding the Selenium Web test framework
 license: perl
+resources:
+  license: http://dev.perl.org/licenses/
 requires:
   File::Copy: 0
 build_requires:
@@ -16,8 +18,11 @@ build_requires:
 provides:
   Alien::Selenium:
     file: lib/Alien/Selenium.pm
-    version: 0.06
-generated_by: Module::Build version 0.26
+    version: 0.07
+generated_by: Module::Build version 0.2808
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2
 no_index:
   directory:
     - examples

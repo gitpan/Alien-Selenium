@@ -1,4 +1,4 @@
-Alien-Selenium-0.06.tar.gz
+.gitignore
 bin/selenium_install
 Build.PL
 Changes
@@ -12,6 +12,7 @@ inc/Module/Load/Conditional.pm
 inc/My/Module/Build.pm
 inc/My/Tests/Below.pm
 inc/Params/Check.pm
+inc/Pod/Snippets.pm
 inc/Text/Patch.pm
 lib/Alien/Selenium.pm
 Makefile.PL
@@ -19,11 +20,12 @@ MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
 README.txt
-selenium-core-0.8.2.zip
+selenium-core-0.8.3.zip
 t/01_load.t
 t/02_install.t
 t/03_readystate.t
 t/maintainer/dependencies.t
+t/maintainer/kwalitee.t
 t/maintainer/nobreakpoints.t
 t/maintainer/nodebugwords.t
 t/maintainer/pod-coverage.t

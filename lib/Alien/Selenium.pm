@@ -28,12 +28,12 @@ Please see L<Alien> for the manifesto of the Alien namespace.
 
 use strict;
 
-our $VERSION = '0.06';
-our $SELENIUM_VERSION = '0.8.2';
+our $VERSION = '0.07';
+our $SELENIUM_VERSION = '0.8.3';
 
 =over
 
-=item I<version()>
+=item I<version ()>
 
 Returns the version of Selenium that is contained within this Alien
 package (not to be confused with $Alien::Selenium::VERSION, which is
@@ -43,7 +43,7 @@ the version number of the Perl wrapper)
 
 sub version { $SELENIUM_VERSION }
 
-=item I<path()>
+=item I<path ()>
 
 Returns the path where a file-for-file copy of the Selenium core has
 been installed as part of the Alien::Selenium Perl package.  One may
@@ -60,7 +60,7 @@ sub path {
     return $base;
 }
 
-=item I<install($destdir)>
+=item I<install ($destdir)>
 
 Install a copy of the contents of L</path> into $dest_dir, which need
 not exist beforehand.
@@ -80,7 +80,7 @@ sub install {
     }
 }
 
-=item I<path_readystate_xpi()>
+=item I<path_readystate_xpi ()>
 
 Returns the path to the C<readyState.xpi> Mozilla/Firefox extension
 that is part of Selenium starting at version 0.8.0.  Returns undef for
@@ -96,7 +96,7 @@ sub path_readystate_xpi {
     return $base;
 }
 
-=item I<install_readystate_xpi($targetfile)>
+=item I<install_readystate_xpi ($targetfile)>
 
 Installs the C<readyState.xpi> file as $targetfile, creating any
 missing directories if needed.  Croaks if there is no

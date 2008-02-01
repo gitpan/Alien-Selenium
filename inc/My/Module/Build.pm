@@ -282,8 +282,6 @@ use File::Spec::Functions qw(catfile catdir splitpath splitdir);
 use File::Basename qw(dirname);
 use File::Spec::Unix ();
 use File::Find;
-use File::Slurp;
-
 
 =begin internals
 
@@ -307,6 +305,32 @@ Your usual bugware-enabling OS checks.
 =cut
 
 use constant is_win32 => scalar($^O =~ /^(MS)?Win32$/);
+
+=head2 read_file($file)
+
+=head2 write_file($file, @lines)
+
+Like in L<File::Slurp>.
+
+=cut
+
+sub read_file {
+  my ($filename) = @_;
+  defined(my $file = IO::File->new($filename, "<")) or die <<"MESSAGE";
+Cannot open $filename for reading: $!.
+MESSAGE
+  return wantarray? <$file> : join("", <$file>);
+}
+
+sub write_file {
+  my ($filename, @contents) = @_;
+  defined(my $file = IO::File->new($filename, ">")) or die <<"MESSAGE";
+Cannot open $filename for writing: $!.
+MESSAGE
+  ($file->print(join("", @contents)) and $file->close()) or die <<"MESSAGE";
+Cannot write into $filename: $!.
+MESSAGE
+}
 
 =end internals
 
@@ -368,14 +392,12 @@ sub requires_for_build {
         'File::Spec::Functions' => 0,
         'File::Spec::Unix'      => 0,
         'File::Find'            => 0,
-        'File::Slurp'           => 0,
         'Module::Build'         => 0,
         'Module::Build::Compat' => 0,
         'FindBin'               => 0, # As per L</SYNOPSIS>
 
         # The following are actually requirements for tests:
         'File::Temp' => 0,  # for tempdir() in My::Tests::Below
-        'File::Slurp' => 0, # a common occurence in my tests
         'Fatal' => 0, # Used to cause tests to die early if fixturing
                       # fails, see sample in this module's test suite
                       # (at the bottom of this file)
@@ -398,11 +420,15 @@ downloaded from CPAN.
 
 sub maintainer_mode_enabled {
     my $self = shift;
-    return 1 if -d catdir($self->base_dir, ".svn");
-    my $svkcmd = sprintf("svk info '%s' 2>%s",
-                         catdir($self->base_dir, "Build.PL"),
-                         File::Spec->devnull);
-    `$svkcmd`; return 1 if ! $?;
+    foreach my $vc_dir (qw(CVS .svn .hg .git)) {
+        return 1 if -d catdir($self->base_dir, $vc_dir);
+    }
+   
+    my $full_cmd = sprintf("yes n | svk info '%s' 2>%s",
+                           catdir($self->base_dir, "Build.PL"),
+                           File::Spec->devnull);
+    `$full_cmd`; return 1 if ! $?;
+
     return 0;
 }
 
@@ -489,6 +515,7 @@ Returns the directory in which C<Build.PL> resides.
 sub topdir {
     # TODO: probably not good enough in some cases.
     require FindBin;
+    no warnings "once";
     return $FindBin::Bin;
 }
 
@@ -941,8 +968,6 @@ Overloaded to add t/lib to the test scripts' @INC (we sometimes put
 helper test classes in there), and also to implement the features
 described in L</Extended C<test> action>.  See also L</_massage_ARGV> for
 more bits of the Emacs debugger support code.
-
-=back
 
 =cut
 
@@ -1596,9 +1621,11 @@ HEADER
     package main_screen; # Do not to pollute the namespace of "main" with
     # the "use" directives below - Still keeping refactoring in mind.
 
+    BEGIN { *write_file = \&My::Module::Build::write_file;
+            *read_file  = \&My::Module::Build::read_file; }
+
     use Test::More;
-    use File::Slurp qw(read_file write_file);
-    use Fatal qw(mkdir chdir read_file write_file);
+    use Fatal qw(mkdir chdir);
 
     local @ARGV = qw(--noinstall-everything);
 
@@ -1632,15 +1659,16 @@ HEADER
 
 ####################### Main test suite ###########################
 
-use File::Slurp qw(read_file write_file);
 use File::Copy qw(copy);
 use File::Spec::Functions qw(catfile catdir);
 use IO::Pipe;
-# Probably wise to add this in real test suites too:
-use Fatal qw(mkdir chdir read_file write_file copy);
+BEGIN { *write_file = \&My::Module::Build::write_file;
+        *read_file  = \&My::Module::Build::read_file; }
 
-my $fakemoduledir =  My::Tests::Below->tempdir() . "/Fake-Module";
-mkdir($fakemoduledir);
+# Probably wise to add this in real test suites too:
+use Fatal qw(mkdir chdir copy);
+
+mkdir(my $fakemoduledir = My::Tests::Below->tempdir() . "/Fake-Module");
 
 my $sample_Build_PL = My::Tests::Below->pod_code_snippet("synopsis");
 
@@ -1746,11 +1774,17 @@ SKIP: {
     skip "Not testing Build distmeta (YAML not available)", 2
         unless eval { require YAML };
 
-    write_file("$fakemoduledir/test.sh",
-               "cd $fakemoduledir\n",
-               My::Tests::Below->pod_data_snippet("distmeta"));
-    system("/bin/sh", "-x", "$fakemoduledir/test.sh");
-    is($?, 0, "creating META.yml using documented procedure");
+    my $snippet = My::Tests::Below->pod_data_snippet("distmeta");
+    my $errfile = "$fakemoduledir/meta-yml-error.log";
+    my $script = <<"SCRIPT";
+exec > "$errfile" 2>&1
+set -x
+cd "$fakemoduledir"
+$snippet
+SCRIPT
+    system($script);
+    is($?, 0, "creating META.yml using documented procedure")
+        or diag($script . read_file($errfile));
     my $META_yml = read_file("$fakemoduledir/META.yml");
     my $excerpt = My::Tests::Below->pod_data_snippet("META.yml excerpt");
     $excerpt =~ s/\n+/\n/gs; $excerpt =~ s/^\n//s;
