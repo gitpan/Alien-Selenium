@@ -1,4 +1,3 @@
-.gitignore
 bin/selenium_install
 Build.PL
 Changes

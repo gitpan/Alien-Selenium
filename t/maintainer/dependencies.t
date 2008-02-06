@@ -84,7 +84,7 @@ our @pervasives = qw(base warnings strict overload utf8 vars constant
                      Getopt::Std Getopt::Long
                      DynaLoader ExtUtils::MakeMaker
                      POSIX Fcntl Cwd Sys::Hostname
-                     IPC::Open2 IPC::Open3
+                     IO::File IPC::Open2 IPC::Open3
                      File::Basename File::Find
                      UNIVERSAL);
 
@@ -101,10 +101,10 @@ module.)
 
 =cut
 
-our @maintainer_dependencies = qw(IO::File Pod::Text Pod::Checker
-                                  Test::Pod Test::Pod::Coverage
-                                  Test::NoBreakpoints Module::ScanDeps
-                                  Test::Kwalitee);
+our @maintainer_dependencies =
+  qw(Pod::Text Pod::Checker Test::Pod Test::Pod::Coverage
+     Test::NoBreakpoints Module::ScanDeps
+     Test::Kwalitee Module::CPANTS::Analyse Module::CPANTS::Kwalitee::Files);
 
 =head2 @sunken_dependencies
 

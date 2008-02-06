@@ -42,10 +42,14 @@ sub podcheck_ok {
 
     sub My::Pod::Checker::poderror {
         my $self = shift;
-        my %opts = %{$_[0]};
-        diag(sprintf("%s: %s (file %s, line %d)",
-                     @opts{qw(-severity -msg -file -line)}))
+        if (ref($_[0]) eq "HASH") {
+          my %opts = %{$_[0]};
+          diag(sprintf("%s: %s (file %s, line %d)",
+                       @opts{qw(-severity -msg -file -line)}))
             unless ($opts{-msg} =~ m/empty section/);
+        } else {
+          diag($_[0]);
+        }
         local $self->{-quiet} = 1;
         return $self->Pod::Checker::poderror(@_);
     }

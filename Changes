@@ -1,5 +1,9 @@
 Revision history for Perl extension Alien::Selenium.
 
+0.08  Fri Feb 6 16:36:03 MET 2008
+    - Fixed build infrastructure for Perl 5.10 (correcting a CPANTS
+      failure)
+
 0.07  Fri Feb 1 17:50:03 MET 2008
     - Upgraded to Selenium 0.8.3
     - Fixed RT #28855

@@ -148,8 +148,9 @@ particular test under Emacs perldb is therefore as simple as typing:
 If a relative path is passed (as shown), it is interpreted relative to
 the current directory set by Emacs (which, except under very bizarre
 conditions, will be the directory of the file currently being
-edited). The verbose above applies here by default, conveniently
-causing the test script to run in verbose mode in the debugger.
+edited). The verbose switch above applies here by default,
+conveniently causing the test script to run in verbose mode in the
+debugger.
 
 Like the original L<Module::Build/test>, C<./Build test> accepts
 supplemental key=value command line switches, as exemplified above
@@ -892,12 +893,14 @@ sub _process_options {
     my $walk_isa; $walk_isa = sub {
         my ($class, $seenref, $resultref) = @_;
         return if $seenref->{$class}++;
-        no strict "refs";
+        my $symtab = do { no strict "refs"; \%{"${class}::"}; };
         push @$resultref, grep {
-            my $meth = *{${"${class}::"}{$_}}{CODE};
-            defined($meth) && $declared_options{overload::StrVal($meth)};
-        } (keys %{"${class}::"});
+            my $symbol = $symtab->{$_};
+            ref(\$symbol) eq "GLOB" && defined(*{$symbol}{CODE}) &&
+              $declared_options{overload::StrVal(*{$symbol}{CODE})};
+        } (keys %$symtab);
 
+        no strict "refs";
         $walk_isa->($_, $seenref, $resultref) foreach @{"${class}::ISA"};
     };
     my @alloptions; $walk_isa->( (ref($self) or $self), {}, \@alloptions);
@@ -964,10 +967,10 @@ sub ACTION_buildXS { }
 
 =item I<ACTION_test>
 
-Overloaded to add t/lib to the test scripts' @INC (we sometimes put
-helper test classes in there), and also to implement the features
-described in L</Extended C<test> action>.  See also L</_massage_ARGV> for
-more bits of the Emacs debugger support code.
+Overloaded to add t/lib and t/inc to the test scripts' @INC (we
+sometimes put helper test classes in there), and also to implement the
+features described in L</Extended C<test> action>.  See also
+L</_massage_ARGV> for more bits of the Emacs debugger support code.
 
 =cut
 
@@ -976,7 +979,8 @@ sub ACTION_test {
 
     # Tweak @INC (done this way, works regardless of whether we'll be
     # doing the harnessing ourselves or not)
-    local @INC = (@INC, catdir($self->base_dir, "t", "lib"));
+    local @INC = (@INC, catdir($self->base_dir, "t", "lib"),
+                  catdir($self->base_dir, "t", "inc"));
 
     # use_blib feature, part 1:
     $self->depends_on("buildXS") if $self->use_blib;
@@ -1436,17 +1440,18 @@ sub _massage_ARGV {
     my ($argvref) = @_;
     my @argv = @$argvref;
 
-	if ($ENV{EMACS} && (grep {$_ eq "-emacs"} @argv) &&
-		$argv[0] eq "-d") {
-        $running_under_emacs_debugger = 1;
+    return unless ($ENV{EMACS} && (grep {$_ eq "-emacs"} @argv));
 
-        shift @argv; # Off with -d
-        # XEmacs foolishly assumes that the second word in the perldb
-		# line is a filename and turns it into e.g. "/my/path/test":
-        my (undef, undef, $build_command) =
-            File::Spec->splitpath(shift @argv);
-        @$argvref = ($build_command, grep {$_ ne "-emacs"} @argv);
-	}
+    $running_under_emacs_debugger = 1;
+
+    @argv = grep { $_ ne "-emacs" } @argv;
+    shift @argv if $argv[0] eq "-d"; # Was gratuitously added by former Emacsen
+
+    # XEmacs foolishly assumes that the second word in the perldb
+    # line is a filename and turns it into e.g. "/my/path/test":
+     (undef, undef, $argv[0]) = File::Spec->splitpath($argv[0]);
+
+    @$argvref = @argv;
 }
 
 =back
