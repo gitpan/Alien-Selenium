@@ -8,6 +8,8 @@ use strict;
 use FindBin; use lib "$FindBin::Bin/inc";
 use My::Module::Build;
 
+require 5.006; # "our"
+
 my $class = My::Module::Build->subclass( code => join('', <DATA>) );
 my $build = $class->new
   ( module_name      => 'Alien::Selenium',

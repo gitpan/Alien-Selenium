@@ -1,6 +1,6 @@
 ---
 name: Alien-Selenium
-version: 0.08
+version: 0.09
 author:
   - |-
     Mattia Barbon <mbarbon@cpan.org>
@@ -18,7 +18,7 @@ build_requires:
 provides:
   Alien::Selenium:
     file: lib/Alien/Selenium.pm
-    version: 0.08
+    version: 0.09
 generated_by: Module::Build version 0.2808
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
